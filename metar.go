@@ -2,6 +2,7 @@ package aviation
 
 import (
 	"fmt"
+	"strings"
 )
 
 /*
@@ -27,17 +28,21 @@ func NewMetar() *Metar {
 
 // Parse parse a metar message.
 // Returns an error, if the message could not be parsed.
-func (m *Metar) Parse(newMessage string) error {
-	m.Message = newMessage
+func (m *Metar) Parse(message string) error {
+	m.Message = message
 
-	loc, err := parseLocation(m.Message)
+	// remove trend message part,
+	// otherwise wind regex will match in the trend also
+	noTrendMessage := removeTrendPart(m.Message)
+
+	loc, err := parseLocation(noTrendMessage)
 	if err != nil {
 		return nil
 	}
 
 	m.Location = loc.icao
 
-	wind, err := parseWind(m.Message)
+	wind, err := parseWind(noTrendMessage)
 	if err != nil {
 		return nil
 	}
@@ -45,6 +50,22 @@ func (m *Metar) Parse(newMessage string) error {
 
 	return nil
 
+}
+
+func removeTrendPart(message string) string {
+	becmIdx := strings.Index(message, "BCM")
+	tempoIdx := strings.Index(message, "TEMPO")
+	if becmIdx == -1 && tempoIdx == -1 {
+		return message
+	}
+
+	if becmIdx != -1 {
+		return message[0:becmIdx]
+	}
+	if tempoIdx != -1 {
+		return message[0:tempoIdx]
+	}
+	return message
 }
 
 // HrDateTime return a human readable string of the metar date time field
