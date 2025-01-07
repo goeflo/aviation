@@ -2,7 +2,6 @@ package aviation
 
 import (
 	"fmt"
-	"strings"
 )
 
 /*
@@ -10,12 +9,15 @@ https://www.metar-taf-decoder.com/
 https://aviationweather.gov/data/metar/?decoded=1&ids=EDDB
 https://en.wikipedia.org/wiki/METAR
 https://www.seabirds.de/ato/Weather-METAR.php
+https://wiki.ivao.aero/en/home/training/documentation/METAR_explanation
+https://met.nps.edu/~bcreasey/mr3222/files/helpful/DecodeMETAR-TAF.html
 */
 type Metar struct {
 	Message  string
-	Icao     string
+	Location string
 	DateTime string
 	IsAuto   bool
+	Wind     *Wind
 }
 
 // new metar struct
@@ -28,22 +30,18 @@ func NewMetar() *Metar {
 func (m *Metar) Parse(newMessage string) error {
 	m.Message = newMessage
 
-	messageTokens := strings.Split(m.Message, " ")
-
-	token := 0
-
-	m.Icao = messageTokens[token]
-	if len(m.Icao) != 4 {
-		return fmt.Errorf("icao code '%v' does not have the required length of 4 char", m.Icao)
+	loc, err := parseLocation(m.Message)
+	if err != nil {
+		return nil
 	}
 
-	token++
-	m.DateTime = messageTokens[token]
+	m.Location = loc.icao
 
-	token++
-	if messageTokens[token] == "AUTO" {
-		m.IsAuto = true
+	wind, err := parseWind(m.Message)
+	if err != nil {
+		return nil
 	}
+	m.Wind = wind
 
 	return nil
 
