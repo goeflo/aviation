@@ -28,6 +28,8 @@ func TestMetar(t *testing.T) {
 			windDirection: "120",
 			windSpeed:     "12",
 			windUnits:     "MPS",
+			variableFrom:  "090",
+			variableTo:    "150",
 		},
 		"EDDB": {
 			msg:           "EDDB 070920Z AUTO 22016KT 9999 FEW036 BKN043 08/01 Q0998 TEMPO 20020G35KT",
@@ -59,9 +61,9 @@ func TestMetar(t *testing.T) {
 		},
 	}
 
-	metar := NewMetar()
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
+			metar := NewMetar()
 			err := metar.Parse(test.msg)
 			assert.Equal(t, test.err, err, name)
 			assert.Equal(t, test.icao, metar.Location, name)
