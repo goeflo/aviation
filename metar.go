@@ -14,11 +14,12 @@ https://wiki.ivao.aero/en/home/training/documentation/METAR_explanation
 https://met.nps.edu/~bcreasey/mr3222/files/helpful/DecodeMETAR-TAF.html
 */
 type Metar struct {
-	Message  string
-	Location string
-	DateTime string
-	IsAuto   bool
-	Wind     *Wind
+	Message    string
+	Location   string
+	DateTime   string
+	IsAuto     bool
+	Wind       *Wind
+	Visibility *Visibility
 }
 
 // new metar struct
@@ -26,7 +27,7 @@ func NewMetar() *Metar {
 	return &Metar{IsAuto: false}
 }
 
-// Parse parse a metar message.
+// Parse a metar message.
 // Returns an error, if the message could not be parsed.
 func (m *Metar) Parse(message string) error {
 	m.Message = message
@@ -48,6 +49,11 @@ func (m *Metar) Parse(message string) error {
 	}
 	m.Wind = wind
 
+	vis, err := parseVisibility(noTrendMessage)
+	if err != nil {
+		return nil
+	}
+	m.Visibility = vis
 	return nil
 
 }
