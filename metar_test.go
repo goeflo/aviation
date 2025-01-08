@@ -1,6 +1,7 @@
 package aviation
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -24,8 +25,8 @@ func TestMetar(t *testing.T) {
 			wind:     Wind{direction: "120", speed: "12", units: "MPS", variableFrom: "090", variableTo: "150"},
 			vis: Visibility{visibiltyRange: "1400",
 				runway: []runwayVisualRange{
-					{rwy: "R04", evolution: "P", becoming: "N", visibiltyRange: "1500"},
-					{rwy: "R22", evolution: "P", becoming: "U", visibiltyRange: "1500"},
+					{rwy: "R04", evolution: "P", change: "N", visibiltyRange: "1500"},
+					{rwy: "R22", evolution: "P", change: "U", visibiltyRange: "1500"},
 				},
 			},
 		},
@@ -44,9 +45,9 @@ func TestMetar(t *testing.T) {
 			wind: Wind{direction: "000", speed: "00", units: "KT"},
 			vis: Visibility{visibiltyRange: "0100",
 				runway: []runwayVisualRange{
-					{rwy: "R14", visibiltyRange: "0250", becoming: "N"},
+					{rwy: "R14", visibiltyRange: "0250", change: "N"},
 					{rwy: "R16", visibiltyRange: "0250", variableRange: "0400", variableBcm: "U"},
-					{rwy: "R28", visibiltyRange: "0300", becoming: "D"},
+					{rwy: "R28", visibiltyRange: "0300", change: "D"},
 				}},
 		},
 		"EDDW II": {
@@ -73,6 +74,11 @@ func TestMetar(t *testing.T) {
 			assert.Equal(t, test.icao, metar.Location, name)
 			assert.Equal(t, &test.wind, metar.Wind, name)
 			assert.Equal(t, &test.vis, metar.Visibility, name)
+
+			fmt.Printf("%v\n", metar.Visibility)
+			for _, rv := range metar.Visibility.runway {
+				fmt.Printf("  * %v\n", rv)
+			}
 		})
 	}
 

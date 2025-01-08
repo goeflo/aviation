@@ -29,14 +29,64 @@ var visibilitySingleRunwaysRegex = regexp.MustCompile(visibilitySingleRunwayPatt
 type runwayVisualRange struct {
 	rwy            string
 	visibiltyRange string
-	becoming       string
+	change         string
 	evolution      string
 	variableRange  string
 	variableBcm    string
 }
+
 type Visibility struct {
 	visibiltyRange string
 	runway         []runwayVisualRange
+}
+
+func (r runwayVisualRange) String() string {
+	sb := strings.Builder{}
+	sb.WriteString(r.rwy)
+
+	sb.WriteString(": Minimal visibility on runway: ")
+	if r.evolution == "P" {
+		sb.WriteString("greater than ")
+	} else if r.evolution == "M" {
+		sb.WriteString("less than ")
+	}
+	sb.WriteString(strings.TrimLeft(r.visibiltyRange, "0"))
+	sb.WriteString("m. ")
+
+	if r.change == "N" {
+		sb.WriteString("no significant change")
+	} else if r.change == "U" {
+		sb.WriteString("up rising")
+	} else if r.change == "D" {
+		sb.WriteString("decreasing")
+	}
+
+	if r.variableRange != "" {
+		sb.WriteString("Maximal visibility on the runway: ")
+		sb.WriteString(strings.TrimLeft(r.variableRange, "0"))
+		sb.WriteString("m ")
+	}
+	if r.variableBcm == "N" {
+		sb.WriteString("no significant change")
+	} else if r.variableBcm == "U" {
+		sb.WriteString("up rising")
+	} else if r.variableBcm == "D" {
+		sb.WriteString("decreasing")
+	}
+
+	return sb.String()
+}
+
+func (v Visibility) String() string {
+	sb := strings.Builder{}
+	sb.WriteString("Visibility : ")
+	if v.visibiltyRange == "9999" {
+		sb.WriteString(">10km")
+	} else {
+		sb.WriteString(strings.TrimLeft(v.visibiltyRange, "0"))
+		sb.WriteString("m")
+	}
+	return sb.String()
 }
 
 func parseVisibility(message string) (*Visibility, error) {
@@ -75,7 +125,7 @@ func parseRunwaysString(runways [][]string) []runwayVisualRange {
 		rwyVisRange = append(rwyVisRange, runwayVisualRange{
 			rwy:            result["rwy"],
 			evolution:      result["evo"],
-			becoming:       result["bcm"],
+			change:         result["bcm"],
 			visibiltyRange: result["vis"],
 			variableRange:  result["variable"],
 			variableBcm:    result["vbcm"],
